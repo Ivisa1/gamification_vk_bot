@@ -46,7 +46,7 @@ async def reusable_tasks_enter_handler(event: MessageEvent):
     )
     await bot.api.messages.send(
         user_id=event.object.user_id,
-        random_id=randomiser.randint,
+        random_id=randomiser.randint(0, 10000),
         peer_id=event.object.peer_id,
         message='Ваши постоянные задачи',
         keyboard=back_main_menu_keyboard
@@ -54,7 +54,7 @@ async def reusable_tasks_enter_handler(event: MessageEvent):
     # Нужно создать клавиатуру для управления задачами и добавить её в запрос ниже
     await bot.api.messages.send(
         user_id=event.object.user_id,
-        random_id=randomiser.randint,
+        random_id=randomiser.randint(0, 10000),
         peer_id=event.object.peer_id,
         message='Задача', # Тут выводить задачи из БД
         keyboard=None

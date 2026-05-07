@@ -12,10 +12,11 @@ profile_labeler: BotLabeler = BotLabeler()
 
 @profile_labeler.message(payload={'cmd': 'my_profile'}, text='Мой профиль')
 async def profile_enter_handler(message: Message):
-    # async with async_session_maker().begin() as session:
-        # query = select(UserModel).where(UserModel.id==482393697)
-        # user_info = await session.execute(query)
-        # print(user_info.all())
+    async with async_session_maker() as session:
+        async with session.begin():
+            query = select(UserModel).where(UserModel.id==482393697)
+            user_info = await session.execute(query)
+            print(user_info.all())
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_PROFILE)
     await message.answer(
         "Вы вошли на страницу вашего профиля",

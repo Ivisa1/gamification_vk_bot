@@ -65,19 +65,6 @@ async def main_menu_return_handler(message: Message):
 async def start(message: Message):
     # Проверка на то, что пользователь уже есть в БД
     if not await check_user_reg(message.from_id):
-        # Если нет
-        # async with async_engine.begin() as aconn:
-        #     user = await bot.api.users.get(user_ids=[message.from_id])
-        #     first_name = user[0].first_name
-        #     last_name = user[0].last_name
-        #     await aconn.execute(
-        #         text('INSERT INTO users(id, first_name, last_name) VALUES (:user_id, :first_name, :last_name)'),
-        #         {
-        #             'user_id': message.from_id,
-        #             'first_name': first_name,
-        #             'last_name': last_name
-        #         }
-        #     )
         async with async_session_maker.begin() as session:
             user_data = await bot.api.users.get(user_ids=[message.from_id])
             first_name = user_data[0].first_name
