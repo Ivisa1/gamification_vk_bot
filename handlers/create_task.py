@@ -42,6 +42,7 @@ async def create_task_handler(message: Message):
         await message.answer(
             'Введите описание задачи (введите ".", чтобы оставить поле пустым): '
         )
+        print(tasks_in_creation)
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_DESCRIPTION}':
         await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_CREATE_TASK_TYPE)
         if message.text != '.':

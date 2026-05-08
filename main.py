@@ -9,7 +9,7 @@ from vkbottle.bot import Message, MessageEvent
 
 from sqlalchemy import MetaData, text
 
-from bot import bot
+from bot import bot, tasks_in_creation
 from db_engine import sync_engine, async_engine, async_session_maker
 from globals import DB_URL, BOT_TOKEN
 from logic import empty_callback_answer
@@ -55,6 +55,9 @@ async def main_menu_return_handler(message: Message):
         "Вы вышли в главное меню",
         keyboard=main_menu_keyboard
     )
+    user_id = message.from_id
+    tasks_in_creation.pop(user_id, None)
+    print(tasks_in_creation)
 
 @bot.on.message(text='/start')
 async def start(message: Message):
