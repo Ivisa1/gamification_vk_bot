@@ -49,7 +49,7 @@ class KeyboardCreator():
             .add(vk.Callback('Одноразовые задачи', payload={'tasks': 'disposable'}), color=color.PRIMARY)
         )
     
-    def in_leaderboard_keyboard(type='friends'):
+    def in_leaderboard_keyboard(type='global'):
         return (
             vk.Keyboard(inline=True)
             .add(vk.Callback(
