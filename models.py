@@ -48,7 +48,7 @@ class TasksModel(BaseModel):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey(column='users.id', ondelete='CASCADE'))
     title: Mapped[str] = mapped_column(String(50), nullable=False)
-    description: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(String, nullable=True)
     difficulcy: Mapped[DifficulcyEnum] = mapped_column(
         SQLAlchemyEnum(DifficulcyEnum, name='difficulcy_level'),
         default=DifficulcyEnum.VERY_EASY,

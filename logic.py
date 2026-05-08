@@ -1,7 +1,11 @@
+from __future__ import annotations
 from vkbottle.bot import MessageEvent
+from typing import TYPE_CHECKING
 
 from bot import bot
-from models import UserModel
+
+if TYPE_CHECKING:
+    from models import UserModel
 
 # Получает текущий уровень пользователя на основе его опыта
 def get_level(xp: int):

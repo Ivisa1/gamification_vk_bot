@@ -1,16 +1,13 @@
 import asyncio
-from pprint import pprint
-import psycopg
-import random
-import selectors
+# import psycopg
+# import random
+# import selectors
 import sys
-from typing import Dict
 import vkbottle as vk
 from vkbottle import GroupEventType
 from vkbottle.bot import Message, MessageEvent
 
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy import MetaData, text
 
 from bot import bot
 from db_engine import sync_engine, async_engine, async_session_maker
@@ -19,9 +16,6 @@ from logic import empty_callback_answer
 from models import *
 from keyboards import *
 from states import UserStates
-
-# Задачи в процессе создания
-tasks_in_creation: Dict[int, Dict[str, str]] = {}
 
 # Функция пересоздания БД
 async def recreate_db():
@@ -90,7 +84,7 @@ async def start(message: Message):
             # aconn.execute()
     await message.answer('Добро пожаловать в бота', keyboard=main_menu_keyboard)
 
-@bot.on.raw_event(vk.GroupEventType.MESSAGE_EVENT, MessageEvent)
+@bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def unknown_event(event: MessageEvent):
     await empty_callback_answer(event)
 
