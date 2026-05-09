@@ -124,14 +124,16 @@ class KeyboardCreator():
             )
         )
     
-    def task_keyboard(first_task=True, last_task=False):
+    def task_keyboard(user_info, task_id):
         keyboard = vk.Keyboard(inline=True)
-        if not first_task:
-            keyboard.add(vk.Callback('<', payload={'task': 'prev'}), color=vk.KeyboardButtonColor.PRIMARY)
-        if not last_task:
-            keyboard.add(vk.Callback('>', payload={'task': 'prev'}), color=vk.KeyboardButtonColor.PRIMARY)
+        if user_info['curr_offset']:
+            keyboard.add(vk.Callback('<', payload={'task': 'prev'}), color=color.PRIMARY)
+        if user_info['curr_offset']+1 < user_info['tasks_count']:
+            keyboard.add(vk.Callback('>', payload={'task': 'next'}), color=color.PRIMARY)
         keyboard.row()
         # Дописать кнопки для управления задачами
+        keyboard.add(vk.Callback('Выполнить задачу', payload={'task': 'complete'}), color=color.POSITIVE)
+        keyboard.add(vk.Callback('Удалить задачу', payload={'task': 'delete'}), color=color.NEGATIVE)
         return keyboard
 
 def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict[str, bool], level_1: str = None, level_2: str = None):
@@ -144,7 +146,6 @@ def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict
 
     payload = {'types': types, 'difficulties': difficulties}
     if level_1 is None or level_2 is None:
-        payload['tasks'] = 'show'
-        return payload
+        return {'tasks': 'show', 'params': payload}
     payload[level_1][level_2] = not payload[level_1][level_2]
     return payload

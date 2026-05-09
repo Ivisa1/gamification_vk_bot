@@ -4,11 +4,11 @@ from vkbottle import NotRule
 from vkbottle.bot import BotLabeler, rules, MessageEvent, Message
 from sqlalchemy import select, and_
 
-from bot import bot
+from bot import bot, tasks_list_params
 from db_engine import async_session_maker
 from randomiser import randomiser
 from logic import empty_callback_answer, get_task
-from models import TasksModel, TypeEnum
+from models import TasksModel, TypeEnum, DifficulcyEnum
 from states import UserStates
 from keyboards import KeyboardCreator as KC
 
@@ -39,57 +39,6 @@ async def tasks_list_enter_handler(message: Message):
 @tasks_list_labeler.raw_event(
     vk.GroupEventType.MESSAGE_EVENT,
     MessageEvent,
-    rules.PayloadRule({'tasks': 'reusable'}),
-    custom_state=UserStates.IN_TASKS
-)
-async def reusable_tasks_enter_handler(event: MessageEvent):
-    await bot.state_dispenser.set(peer_id=event.object.peer_id, state=UserStates.IN_REUSABLE_TASKS)
-    await empty_callback_answer()
-    await bot.api.messages.send(
-        user_id=event.object.user_id,
-        random_id=randomiser.randint(0, 10000),
-        peer_id=event.object.peer_id,
-        message='Ваши постоянные задачи',
-        keyboard=KC.back_main_menu_keyboard()
-    )
-    # Нужно создать клавиатуру для управления задачами и добавить её в запрос ниже
-    curr_offset = 0
-    await bot.api.messages.send(
-        user_id=event.object.user_id,
-        random_id=randomiser.randint(0, 10000),
-        peer_id=event.object.peer_id,
-        message='Задача', # Тут выводить задачи из БД
-        keyboard=None
-    )
-
-@tasks_list_labeler.raw_event(
-    vk.GroupEventType.MESSAGE_EVENT,
-    MessageEvent,
-    rules.PayloadRule({'tasks': 'diposable'}),
-    custom_state=UserStates.IN_TASKS
-)
-async def disposable_tasks_enter_handler(event: MessageEvent):
-    await bot.state_dispenser.set(peer_id=event.object.peer_id, state=UserStates.IN_DISPOSABLE_TASKS)
-    await empty_callback_answer()
-    await bot.api.messages.send(
-        user_id=event.object.user_id,
-        random_id=randomiser.randint,
-        peer_id=event.object.peer_id,
-        message='Ваши одноразовые задачи',
-        keyboard=KC.back_main_menu_keyboard()
-    )
-    # Нужно создать клавиатуру для управления задачами и добавить её в запрос ниже
-    await bot.api.messages.send(
-        user_id=event.object.user_id,
-        random_id=randomiser.randint,
-        peer_id=event.object.peer_id,
-        message='Задача', # Тут выводить задачи из БД
-        keyboard=None
-    )
-
-@tasks_list_labeler.raw_event(
-    vk.GroupEventType.MESSAGE_EVENT,
-    MessageEvent,
     CustomStateRule(UserStates.IN_TASKS),
     NotRule(rules.PayloadRule({'cmd': 'main_menu'}))
 )
@@ -113,7 +62,29 @@ async def change_tasks_panel(event: MessageEvent):
     state=UserStates.IN_TASKS
 )
 async def show_tasks(message: Message):
+    user_id = message.from_id
+    if not tasks_list_params[user_id].get():
+        tasks_list_params[user_id] = {}
+        payload_params = message.payload['params']
+        types_list: TypeEnum = []
+        for type_ in payload_params['types']:
+            types_list.append(TypeEnum[type_]) if payload_params['types'][type_] else ...
+        tasks_list_params[user_id]['types'] = types_list
+        difficulties_list: DifficulcyEnum = []
+        for difficulty_ in payload_params['difficulties']:
+            types_list.append(DifficulcyEnum[difficulty_]) if payload_params['difficulties'][difficulty_] else ...
+        tasks_list_params[user_id]['difficulties'] = difficulties_list
+        # Подсчет количества задач, подходящих под заданные критерии
+        async with async_session_maker() as session:
+            stmt = (
+                select(TasksModel)
+                .where(and_(TasksModel.id==user_id, TasksModel.type.in_(types_list), TasksModel.difficulcy.in_(difficulties_list)))
+            )
+            result = await session.execute(stmt)
+            tasks = result.scalars().all()
+            tasks_list_params[user_id]['tasks_count'] = len(tasks)
+        tasks_list_params[user_id]['curr_offset'] = 0
     await message.answer(
         'Вывод задач',
-        keyboard=KC.task_keyboard
+        keyboard=KC.task_keyboard()
     )

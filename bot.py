@@ -10,6 +10,7 @@ service_api: vk.API = vk.API(token=SERVICE_TOKEN)
 
 # Задачи в процессе создания
 tasks_in_creation: Dict[int, Dict[str, str]] = {}
+tasks_list_params: Dict[int, Dict[str, str]] = {}
 
 from handlers import labelers
 
