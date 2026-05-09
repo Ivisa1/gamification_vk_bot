@@ -7,7 +7,7 @@ import vkbottle as vk
 from vkbottle import GroupEventType
 from vkbottle.bot import Message, MessageEvent
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, text, select
 
 from bot import bot, tasks_in_creation
 from db_engine import sync_engine, async_engine, async_session_maker
@@ -97,7 +97,7 @@ async def unknown_message(message: Message):
     # pprint(user, indent=3, width=40)
     await message.answer(
         "Неизвестное сообщение. "
-        "Напишите /start для входа в главное меню"
+        "Напишите /start для перезапуска бота и выхода в главное меню"
     )
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 import vkbottle as vk
 from vkbottle import KeyboardButtonColor as color
+from typing import Dict
 
 # Клавиатуры
 main_menu_keyboard = (
@@ -41,12 +42,71 @@ class KeyboardCreator():
             .add(vk.Text('Вернуться в главное меню', payload={'cmd': 'main_menu'}))
         )
     
-    def choose_tasks_per_type_keyboard():
+    def choose_tasks_keyboard(
+        types: Dict[str, bool]={'reusable': True, 'disposable': True},
+        difficulties: Dict[str, bool]={'very_easy': True, 'easy': True, 'medium': True, 'hard': True, 'very_hard': True}
+    ):
         return (
             vk.Keyboard(inline=True)
-            .add(vk.Callback('Постоянные задачи', payload={'tasks': 'reusable'}), color=color.PRIMARY)
+            .add(
+                vk.Callback(
+                    ('* ' if types['reusable'] else '') + 'Постоянные',
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'types', 'reusable')
+                ),
+                color=color.PRIMARY if types['reusable'] else color.SECONDARY
+            )
+            .add(
+                vk.Callback(
+                    ('* ' if types['disposable'] else '') + 'Одноразовые', 
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'types', 'disposable')
+                ), 
+                color=color.PRIMARY if types['disposable'] else color.SECONDARY
+            )
             .row()
-            .add(vk.Callback('Одноразовые задачи', payload={'tasks': 'disposable'}), color=color.PRIMARY)
+            .add(
+                vk.Callback(
+                    ('* ' if difficulties['very_easy'] else '') + 'Оч. Лёгк.', 
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'difficulties', 'very_easy')
+                ), 
+                color=color.PRIMARY if difficulties['very_easy'] else color.SECONDARY
+            )
+            .add(
+                vk.Callback(
+                    ('* ' if difficulties['easy'] else '') + 'Лёгк.', 
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'difficulties', 'easy')
+                ), 
+                color=color.PRIMARY if difficulties['easy'] else color.SECONDARY
+            )
+            .add(
+                vk.Callback(
+                    ('* ' if difficulties['medium'] else '') + 'Средн.', 
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'difficulties', 'medium')
+                ), 
+                color=color.PRIMARY if difficulties['medium'] else color.SECONDARY
+            )
+            .row()
+            .add(
+                vk.Callback(
+                    ('* ' if difficulties['hard'] else '') + 'Сложн.', 
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'difficulties', 'hard')
+                ), 
+                color=color.PRIMARY if difficulties['hard'] else color.SECONDARY
+            )
+            .add(
+                vk.Callback(
+                    ('* ' if difficulties['very_hard'] else '') + 'Оч. Сложн.', 
+                    payload=payload_for_choose_tasks_keyboard(types.copy(), difficulties.copy(), 'difficulties', 'very_hard')
+                ), 
+                color=color.PRIMARY if difficulties['very_hard'] else color.SECONDARY
+            )
+            .row()
+            .add(
+                vk.Text(
+                    'Показать задачи',
+                    payload=payload_for_choose_tasks_keyboard(types, difficulties)
+                ),
+                color=color.POSITIVE
+            )
         )
     
     def in_leaderboard_keyboard(type='global'):
@@ -63,3 +123,28 @@ class KeyboardCreator():
                 color=color.PRIMARY if type=='global' else color.SECONDARY
             )
         )
+    
+    def task_keyboard(first_task=True, last_task=False):
+        keyboard = vk.Keyboard(inline=True)
+        if not first_task:
+            keyboard.add(vk.Callback('<', payload={'task': 'prev'}), color=vk.KeyboardButtonColor.PRIMARY)
+        if not last_task:
+            keyboard.add(vk.Callback('>', payload={'task': 'prev'}), color=vk.KeyboardButtonColor.PRIMARY)
+        keyboard.row()
+        # Дописать кнопки для управления задачами
+        return keyboard
+
+def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict[str, bool], level_1: str = None, level_2: str = None):
+    """
+    Возвращает payload для кнопок из раздела фильтрации необходимых для вывода задач
+
+    :level_1 - содержит строку-ключ для первого уровня payload-словаря\n
+    :level_2 - содержит строку-ключ для второго уровня payload-словаря
+    """
+
+    payload = {'types': types, 'difficulties': difficulties}
+    if level_1 is None or level_2 is None:
+        payload['tasks'] = 'show'
+        return payload
+    payload[level_1][level_2] = not payload[level_1][level_2]
+    return payload

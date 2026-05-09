@@ -98,16 +98,16 @@ async def get_global_leaderboard():
 # Выдает таблицу лидеров друзей (включая пользователя)
 async def get_friends_leaderboard(user_id: int):
     print('запрос друзей')
+    answer = ''
     friends: List[int] = []
     try:
-        friends = await service_api.friends.get(user_id=user_id)
-        friends = friends.items
+        friends = (await service_api.friends.get(user_id=user_id)).items
     except vk.exception_factory.base_exceptions.VKAPIError_30:
         print('отловилась ошибка приватного профиля')
+        answer = answer + 'Не удалось получить ваш список друзей. Сделайте профиль открытым (публичным) и повторите попытку\n\n'
         friends = []
     print('друзья получены')
     friends.append(user_id)
-    answer = ''
     async with async_session_maker() as session:
         stmt = (
             select(UserModel.id, UserModel.first_name, UserModel.last_name, UserModel.current_xp)

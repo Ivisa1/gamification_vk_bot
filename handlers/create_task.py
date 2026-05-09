@@ -96,6 +96,7 @@ async def add_task_in_db(message: Message, user_id: int):
     async with async_session_maker() as session:
         session.add(tasks_in_creation[user_id])
         await session.commit()
+    tasks_in_creation.pop(message.from_id, None)
     await message.answer(
         "Задача успешно создана",
         keyboard=KC.main_menu_keyboard()

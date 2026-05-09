@@ -23,6 +23,9 @@ class TypeEnum(str, enum.Enum):
     DISPOSABLE = 'Одноразовая'
     REUSABLE = 'Многоразовая'
 
+
+print(DifficulcyEnum.VERY_EASY.value, type(DifficulcyEnum.VERY_EASY.value))
+
 ### ТИПЫ ДЛЯ АННОТАЦИЙ
 
 ### МОДЕЛИ ###
