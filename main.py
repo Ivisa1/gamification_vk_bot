@@ -94,6 +94,7 @@ async def unknown_event(event: MessageEvent):
 
 @bot.on.message()
 async def unknown_message(message: Message):
+    print(message)
     user = await bot.api.users.get(user_ids=[1106823933])
     # pprint(user, indent=3, width=40)
     await message.answer(

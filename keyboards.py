@@ -124,7 +124,7 @@ class KeyboardCreator():
             )
         )
     
-    def task_keyboard(user_info, task_id):
+    def task_keyboard(user_info, task_id: int):
         keyboard = vk.Keyboard(inline=True)
         if user_info['curr_offset']:
             keyboard.add(vk.Callback('<', payload={'task': 'prev'}), color=color.PRIMARY)
@@ -132,8 +132,8 @@ class KeyboardCreator():
             keyboard.add(vk.Callback('>', payload={'task': 'next'}), color=color.PRIMARY)
         keyboard.row()
         # Дописать кнопки для управления задачами
-        keyboard.add(vk.Callback('Выполнить задачу', payload={'task': 'complete'}), color=color.POSITIVE)
-        keyboard.add(vk.Callback('Удалить задачу', payload={'task': 'delete'}), color=color.NEGATIVE)
+        keyboard.add(vk.Callback('Выполнить', payload={'task': 'complete'}), color=color.POSITIVE)
+        keyboard.add(vk.Callback('Удалить', payload={'task': 'delete'}), color=color.NEGATIVE)
         return keyboard
 
     def back_to_choose_tasks_keyboard(params):

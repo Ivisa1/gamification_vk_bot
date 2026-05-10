@@ -1,6 +1,6 @@
 from random import randint
 import vkbottle as vk
-from vkbottle import NotRule, OrRule
+from vkbottle import NotRule, OrRule, AndRule
 from vkbottle.bot import BotLabeler, rules, MessageEvent, Message
 from sqlalchemy import select, and_
 from typing import List
@@ -8,7 +8,7 @@ from typing import List
 from bot import bot, tasks_list_params
 from db_engine import async_session_maker
 from randomiser import randomiser
-from logic import empty_callback_answer, get_task
+from logic import empty_callback_answer, get_task, show_task
 from models import TasksModel, TypeEnum, DifficulcyEnum
 from states import UserStates
 from keyboards import KeyboardCreator as KC
@@ -68,8 +68,16 @@ async def change_tasks_panel(event: MessageEvent):
     )
 
 @tasks_list_labeler.message(
-    payload_contains={'cmd': 'show_tasks'},
-    state=UserStates.IN_CHOOSE_TASKS
+    OrRule(
+        AndRule(
+            rules.PayloadContainsRule({'cmd': 'show_tasks'}),
+            rules.StateRule(UserStates.IN_CHOOSE_TASKS)
+        ),
+        rules.PayloadContainsRule({'task': 'prev'}),
+        rules.PayloadContainsRule({'task': 'next'}),
+        rules.PayloadContainsRule({'task': 'complete'}),
+        rules.PayloadContainsRule({'task': 'delete'})
+    )
 )
 async def show_tasks(message: Message):
     user_id = message.from_id
@@ -100,9 +108,9 @@ async def show_tasks(message: Message):
             print(tasks)
             tasks_list_params[user_id]['tasks_count'] = len(tasks)
         tasks_list_params[user_id]['curr_offset'] = 0
-        print(tasks_list_params)
 
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_TASKS)
+    # Удаляем сообщения предыдущего меню
     filters_message: Message = await bot.api.messages.search(
         q='Выберите, ',
         peer_id=message.peer_id,
@@ -122,11 +130,80 @@ async def show_tasks(message: Message):
         )
     except Exception as e:
         print(f'Не удалось удалить сообщение: {e}')
+    
     await message.answer(
         'Ваш список задач, соответствующий заданным фильтрам:',
         keyboard=KC.back_to_choose_tasks_keyboard(message.get_payload_json()['params'])
     )
-    # await message.answer(
-    #     'Вывод задачи',
-    #     keyboard=KC.task_keyboard()
+    if tasks_list_params[user_id]['tasks_count'] == 0:
+        await message.answer(
+            'У вас нет задач, подходящих под заданные параметры.'
+        )
+        return
+    task = await get_task(user_id)
+    str_task_info = show_task(task)
+    await message.answer(
+        str_task_info,
+        keyboard=KC.task_keyboard(tasks_list_params[user_id], task.id)
+    )
+
+@tasks_list_labeler.raw_event(
+    vk.GroupEventType.MESSAGE_EVENT,
+    MessageEvent,
+    OrRule(
+        rules.PayloadContainsRule({'task': 'prev'}),
+        rules.PayloadContainsRule({'task': 'next'}),
+        rules.PayloadContainsRule({'task': 'complete'}),
+        rules.PayloadContainsRule({'task': 'delete'})
+    ),
+    CustomStateRule(UserStates.IN_TASKS)
+)
+async def edit_show_tasks(event: MessageEvent):
+    user_id = event.user_id
+    action = event.get_payload_json().pop('task')
+    match action:
+        case 'prev':
+            await empty_callback_answer(event)
+            if tasks_list_params[user_id]['curr_offset'] > 0:
+                tasks_list_params[user_id]['curr_offset'] -= 1
+        case 'next':
+            await empty_callback_answer(event)
+            if tasks_list_params[user_id]['curr_offset'] < tasks_list_params[user_id]['tasks_count']:
+                tasks_list_params[user_id]['curr_offset'] += 1
+        case 'complete':
+            tasks_list_params[user_id]['tasks_count'] -= 1
+        case 'delete':
+            tasks_list_params[user_id]['tasks_count'] -= 1
+        case _:
+            pass
+    if tasks_list_params[user_id]['tasks_count'] == 0:
+        await bot.api.messages.edit(
+            peer_id=event.peer_id,
+            cmid=event.conversation_message_id,
+            message='У вас нет задач, подходящих под заданные параметры.',
+            keyboard=vk.Keyboard(inline=True)
+        )
+        return
+    task = await get_task(user_id)
+    str_task_info = show_task(task)
+    # try:
+    #     await bot.api.messages.delete(
+    #         cmids=[event.conversation_message_id],
+    #         peer_id=event.peer_id,
+    #         delete_for_all=1
+    #     )
+    # except Exception as e:
+    #     print(f'Не удалось удалить сообщение: {e}')
+    # await event.send_message(
+    #     random_id=randomiser.randint(0, 10000),
+    #     message=str_task_info,
+    #     keyboard=KC.task_keyboard(tasks_list_params[user_id], task.id)
     # )
+    print(str_task_info.as_raw_data())
+    await bot.api.messages.edit(
+        peer_id=event.peer_id,
+        cmid=event.conversation_message_id,
+        message=str_task_info,
+        keyboard=KC.task_keyboard(tasks_list_params[user_id], task.id),
+        format_data=str_task_info.as_raw_data()
+    )

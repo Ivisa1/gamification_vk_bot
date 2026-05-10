@@ -22,7 +22,6 @@ async def profile_enter_handler(message: Message):
         "Вы вошли на страницу вашего профиля",
         keyboard=back_main_menu_keyboard
     )
-    profile_inline_keyboard = vk.Keyboard(inline=True)
     await message.answer(
         "Профиль",
         keyboard=vk.Keyboard(inline=True)
