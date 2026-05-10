@@ -30,7 +30,7 @@ class KeyboardCreator():
         return (
             vk.Keyboard(inline=False)
             .add(vk.Text('Создать задачу', payload={'cmd': 'create_task'}), color=color.PRIMARY)
-            .add(vk.Text('Просмотреть задачи', payload={'cmd': 'tasks_list'}), color=color.SECONDARY)
+            .add(vk.Text('Просмотреть задачи', payload={'cmd': 'tasks_filters'}), color=color.SECONDARY)
             .row()
             .add(vk.Text('Мой профиль', payload={'cmd': 'my_profile'}), color=color.SECONDARY)
             .add(vk.Text('Таблица лидеров', payload={'cmd': 'leaderboard'}), color=color.SECONDARY)
@@ -136,6 +136,12 @@ class KeyboardCreator():
         keyboard.add(vk.Callback('Удалить задачу', payload={'task': 'delete'}), color=color.NEGATIVE)
         return keyboard
 
+    def back_to_choose_tasks_keyboard(params):
+        return (
+            vk.Keyboard(inline=False)
+            .add(vk.Text('Вернуться к выбору задач', payload={'cmd': 'tasks_filters', 'params': params}))
+        )
+
 def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict[str, bool], level_1: str = None, level_2: str = None):
     """
     Возвращает payload для кнопок из раздела фильтрации необходимых для вывода задач
@@ -146,6 +152,6 @@ def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict
 
     payload = {'types': types, 'difficulties': difficulties}
     if level_1 is None or level_2 is None:
-        return {'tasks': 'show', 'params': payload}
+        return {'cmd': 'show_tasks', 'params': payload}
     payload[level_1][level_2] = not payload[level_1][level_2]
     return payload

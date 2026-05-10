@@ -1,7 +1,7 @@
 import asyncio
 # import psycopg
 # import random
-# import selectors
+import selectors
 import sys
 import vkbottle as vk
 from vkbottle import GroupEventType
@@ -9,12 +9,12 @@ from vkbottle.bot import Message, MessageEvent
 
 from sqlalchemy import MetaData, text, select
 
-from bot import bot, tasks_in_creation
+from bot import bot, tasks_in_creation, tasks_list_params
 from db_engine import sync_engine, async_engine, async_session_maker
 from globals import DB_URL, BOT_TOKEN
 from logic import empty_callback_answer
 from models import *
-from keyboards import *
+from keyboards import KeyboardCreator as KC
 from states import UserStates
 
 # Функция пересоздания БД
@@ -46,18 +46,16 @@ async def interval_func():
         print(res.all())
     print('Я выполнилась')
 
-@bot.on.message(text='Вернуться в главное меню')
 @bot.on.message(payload={'cmd': 'main_menu'})
 async def main_menu_return_handler(message: Message):
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
     print(await bot.state_dispenser.get(peer_id=message.peer_id))
     await message.answer(
         "Вы вышли в главное меню",
-        keyboard=main_menu_keyboard
+        keyboard=KC.main_menu_keyboard()
     )
     user_id = message.from_id
     tasks_in_creation.pop(user_id, None)
-    print(tasks_in_creation)
 
 @bot.on.message(text='/start')
 async def start(message: Message):
@@ -85,7 +83,10 @@ async def start(message: Message):
             # await session.commit()
             
             # aconn.execute()
-    await message.answer('Добро пожаловать в бота', keyboard=main_menu_keyboard)
+    user_id = message.from_id
+    tasks_in_creation.pop(user_id, None)
+    tasks_list_params.pop(user_id, None)
+    await message.answer('Добро пожаловать в бота', keyboard=KC.main_menu_keyboard())
 
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def unknown_event(event: MessageEvent):

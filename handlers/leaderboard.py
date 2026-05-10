@@ -97,7 +97,6 @@ async def get_global_leaderboard():
 
 # Выдает таблицу лидеров друзей (включая пользователя)
 async def get_friends_leaderboard(user_id: int):
-    print('запрос друзей')
     answer = ''
     friends: List[int] = []
     try:
@@ -106,7 +105,6 @@ async def get_friends_leaderboard(user_id: int):
         print('отловилась ошибка приватного профиля')
         answer = answer + 'Не удалось получить ваш список друзей. Сделайте профиль открытым (публичным) и повторите попытку\n\n'
         friends = []
-    print('друзья получены')
     friends.append(user_id)
     async with async_session_maker() as session:
         stmt = (

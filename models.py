@@ -13,18 +13,20 @@ from typing import Annotated
 
 # Пример, как делать Enum: https://habr.com/ru/companies/amvera/articles/849836/
 class DifficulcyEnum(str, enum.Enum):
-    VERY_EASY = 'Очень лёгкая'
-    EASY = 'Лёгкая'
-    MEDIUM = 'Средняя'
-    HARD = 'Сложная'
-    VERY_HARD = 'Очень сложная'
+    VERY_EASY = 'very_easy'
+    EASY = 'easy'
+    MEDIUM = 'medium'
+    HARD = 'hard'
+    VERY_HARD = 'very_hard'
 
 class TypeEnum(str, enum.Enum):
-    DISPOSABLE = 'Одноразовая'
-    REUSABLE = 'Многоразовая'
+    DISPOSABLE = 'disposable'
+    REUSABLE = 'reusable'
 
 
-print(DifficulcyEnum.VERY_EASY.value, type(DifficulcyEnum.VERY_EASY.value))
+print(DifficulcyEnum.VERY_EASY)
+print(DifficulcyEnum('very_easy'))
+
 
 ### ТИПЫ ДЛЯ АННОТАЦИЙ
 

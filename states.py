@@ -13,9 +13,8 @@ class UserStates(BaseStateGroup):
     IN_LEADERBOARD_FRIENDS = "in_leaderboard_friends"
 
     # Состояния в меню созданных задач
+    IN_CHOOSE_TASKS = "in_choose_tasks"
     IN_TASKS = "in_tasks" # В общем меню задач
-    IN_REUSABLE_TASKS = 'in_reusable_tasks' # В менб многоразовых задач
-    IN_DISPOSABLE_TASKS = 'in_disposable_tasks' # В меню одноразовых задач
 
     # Состояния во время создания задачи
     IN_CREATE_TASK_TITLE = 'in_create_task_title'

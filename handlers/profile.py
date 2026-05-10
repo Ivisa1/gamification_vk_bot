@@ -10,7 +10,7 @@ from models import UserModel
 
 profile_labeler: BotLabeler = BotLabeler()
 
-@profile_labeler.message(payload={'cmd': 'my_profile'}, text='Мой профиль')
+@profile_labeler.message(payload={'cmd': 'my_profile'})
 async def profile_enter_handler(message: Message):
     async with async_session_maker() as session:
         async with session.begin():
