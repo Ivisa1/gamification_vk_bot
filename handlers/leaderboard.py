@@ -23,7 +23,6 @@ class CustomStateRule(vk.ABCRule[MessageEvent]):
 
     async def check(self, event: MessageEvent):
         curr_state = await bot.state_dispenser.get(event.peer_id)
-        # print(f"Проверка состояния: текущее={curr_state.state}, ожидаемое={self.state}")  # Отладка
         return curr_state.state == self.state
 
 leaderboard_labeler.custom_rules['custom_state'] = CustomStateRule

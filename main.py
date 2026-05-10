@@ -49,7 +49,6 @@ async def interval_func():
 @bot.on.message(payload={'cmd': 'main_menu'})
 async def main_menu_return_handler(message: Message):
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
-    print(await bot.state_dispenser.get(peer_id=message.peer_id))
     await message.answer(
         "Вы вышли в главное меню",
         keyboard=KC.main_menu_keyboard()
@@ -90,6 +89,7 @@ async def start(message: Message):
 
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def unknown_event(event: MessageEvent):
+    asyncio.sleep(0.4)
     await empty_callback_answer(event)
 
 @bot.on.message()
@@ -112,7 +112,6 @@ if __name__ == '__main__':
         # )
         # asyncio.set_event_loop(asyncio.SelectorEventLoop())
         bot.loop_wrapper.loop = asyncio.SelectorEventLoop()
-        print(bot.labeler.message_view.handlers)
         bot.run_forever()
     else:
         # asyncio.run(main())

@@ -22,7 +22,6 @@ class CustomStateRule(vk.ABCRule[MessageEvent]):
 
     async def check(self, event: MessageEvent):
         curr_state = await bot.state_dispenser.get(event.object.peer_id)
-        print(f"Проверка состояния: текущее={curr_state.state}, ожидаемое={self.state}")  # Отладка
         return curr_state.state == self.state
 
 tasks_list_labeler.custom_rules['custom_state'] = CustomStateRule
@@ -161,6 +160,7 @@ async def show_tasks(message: Message):
     CustomStateRule(UserStates.IN_TASKS)
 )
 async def edit_show_tasks(event: MessageEvent):
+    await a_sleep(0.4)
     user_id = event.user_id
     action = event.get_payload_json().pop('task')
     match action:
@@ -201,7 +201,6 @@ async def edit_show_tasks(event: MessageEvent):
         keyboard=KC.task_keyboard(tasks_list_params[user_id], task.id),
         format_data=str_task_info.as_raw_data()
     )
-    await a_sleep(0.4)
     await empty_callback_answer(event)
 
 async def delete_task(task):
