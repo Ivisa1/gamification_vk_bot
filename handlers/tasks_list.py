@@ -2,14 +2,15 @@ from random import randint
 import vkbottle as vk
 from vkbottle import NotRule, OrRule, AndRule
 from vkbottle.bot import BotLabeler, rules, MessageEvent, Message
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete, update
 from typing import List
 
+from asyncio import sleep as a_sleep
 from bot import bot, tasks_list_params
 from db_engine import async_session_maker
 from randomiser import randomiser
-from logic import empty_callback_answer, get_task, show_task
-from models import TasksModel, TypeEnum, DifficulcyEnum
+from logic import empty_callback_answer, get_task, show_task, add_xp, how_much_xp, increment_counter
+from models import TasksModel, UserModel, UserCountersModel, TypeEnum, DifficulcyEnum
 from states import UserStates
 from keyboards import KeyboardCreator as KC
 
@@ -141,6 +142,7 @@ async def show_tasks(message: Message):
         )
         return
     task = await get_task(user_id)
+    tasks_list_params[user_id]['curr_task'] = task
     str_task_info = show_task(task)
     await message.answer(
         str_task_info,
@@ -163,17 +165,22 @@ async def edit_show_tasks(event: MessageEvent):
     action = event.get_payload_json().pop('task')
     match action:
         case 'prev':
-            await empty_callback_answer(event)
             if tasks_list_params[user_id]['curr_offset'] > 0:
                 tasks_list_params[user_id]['curr_offset'] -= 1
         case 'next':
-            await empty_callback_answer(event)
             if tasks_list_params[user_id]['curr_offset'] < tasks_list_params[user_id]['tasks_count']:
                 tasks_list_params[user_id]['curr_offset'] += 1
         case 'complete':
-            tasks_list_params[user_id]['tasks_count'] -= 1
+            await complete_task(tasks_list_params[user_id]['curr_task'])
+            if tasks_list_params[user_id]['curr_task'].type == TypeEnum.DISPOSABLE:
+                if tasks_list_params[user_id]['curr_offset'] != 0:
+                    tasks_list_params[user_id]['curr_offset'] -= 1
+                tasks_list_params[user_id]['tasks_count'] -= 1
         case 'delete':
+            await delete_task(tasks_list_params[user_id]['curr_task'])
             tasks_list_params[user_id]['tasks_count'] -= 1
+            if tasks_list_params[user_id]['curr_offset'] != 0:
+                tasks_list_params[user_id]['curr_offset'] -= 1
         case _:
             pass
     if tasks_list_params[user_id]['tasks_count'] == 0:
@@ -185,21 +192,8 @@ async def edit_show_tasks(event: MessageEvent):
         )
         return
     task = await get_task(user_id)
+    tasks_list_params[user_id]['curr_task'] = task
     str_task_info = show_task(task)
-    # try:
-    #     await bot.api.messages.delete(
-    #         cmids=[event.conversation_message_id],
-    #         peer_id=event.peer_id,
-    #         delete_for_all=1
-    #     )
-    # except Exception as e:
-    #     print(f'Не удалось удалить сообщение: {e}')
-    # await event.send_message(
-    #     random_id=randomiser.randint(0, 10000),
-    #     message=str_task_info,
-    #     keyboard=KC.task_keyboard(tasks_list_params[user_id], task.id)
-    # )
-    print(str_task_info.as_raw_data())
     await bot.api.messages.edit(
         peer_id=event.peer_id,
         cmid=event.conversation_message_id,
@@ -207,3 +201,31 @@ async def edit_show_tasks(event: MessageEvent):
         keyboard=KC.task_keyboard(tasks_list_params[user_id], task.id),
         format_data=str_task_info.as_raw_data()
     )
+    await a_sleep(0.4)
+    await empty_callback_answer(event)
+
+async def delete_task(task):
+    async with async_session_maker() as session:
+        stmt = delete(TasksModel).filter_by(id=task.id)
+        await session.execute(stmt)
+        await session.commit()
+
+async def complete_task(task: TasksModel):
+    async with async_session_maker() as session:
+        amount = how_much_xp(task.difficulcy)
+        # Добавляем пользователю опыт
+        stmt = (
+            update(UserModel)
+            .where(UserModel.id==task.user_id)
+            .values(current_xp=UserModel.current_xp+amount)
+        )
+        await session.execute(stmt)
+        user_counters = await session.get(UserCountersModel, task.user_id)
+        increment_counter(task, user_counters)
+        print(user_counters.medium)
+        if task.type == TypeEnum.DISPOSABLE:
+            stmt = delete(TasksModel).filter_by(id=task.id)
+            await session.execute(stmt)
+        elif task.type == TypeEnum.REUSABLE:
+            pass
+        await session.commit()

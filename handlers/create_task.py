@@ -13,7 +13,10 @@ create_task_labeler: BotLabeler = BotLabeler()
 
 @create_task_labeler.message(
     OrRule(
-        PayloadRule({'cmd': 'create_task'}),
+        AndRule(
+            PayloadRule({'cmd': 'create_task'}),
+            StateRule(UserStates.IN_MAIN_MENU)
+        ),
         StateRule(
             [
                 UserStates.IN_CREATE_TASK_TITLE,

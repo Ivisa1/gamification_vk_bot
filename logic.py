@@ -6,7 +6,7 @@ from sqlalchemy import select, and_
 
 from bot import bot, tasks_list_params
 from db_engine import async_session_maker
-from models import TasksModel, TypeEnum, DifficulcyEnum
+from models import TasksModel, UserCountersModel, TypeEnum, DifficulcyEnum
 
 if TYPE_CHECKING:
     from models import UserModel
@@ -62,6 +62,36 @@ async def empty_callback_answer(event: MessageEvent):
         user_id=event.user_id,
         event_data=None
     )
+
+async def add_xp(task: TasksModel):
+    amount = how_much_xp(task.difficulcy)
+    return 
+
+def how_much_xp(difficulty):
+    match difficulty:
+        case DifficulcyEnum.VERY_EASY:
+            return 100
+        case DifficulcyEnum.EASY:
+            return 200
+        case DifficulcyEnum.MEDIUM:
+            return 300
+        case DifficulcyEnum.HARD:
+            return 400
+        case DifficulcyEnum.VERY_HARD:
+            return 500
+
+def increment_counter(task: TasksModel, user_counters: UserCountersModel):
+    match task.difficulcy:
+        case DifficulcyEnum.VERY_EASY:
+            user_counters.very_easy += 1
+        case DifficulcyEnum.EASY:
+            user_counters.easy += 1
+        case DifficulcyEnum.MEDIUM:
+            user_counters.medium += 1
+        case DifficulcyEnum.HARD:
+            user_counters.hard += 1
+        case DifficulcyEnum.VERY_HARD:
+            user_counters.very_hard += 1
 
 # Переводы сложностей задач на английский
 ru_types = {'reusable': 'Постоянная', 'disposable': 'Одноразовая'}
