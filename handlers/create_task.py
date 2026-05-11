@@ -1,7 +1,7 @@
 import vkbottle as vk
 from vkbottle.bot import BotLabeler, Message, MessageEvent
 from vkbottle.dispatch.rules import OrRule, NotRule, AndRule
-from vkbottle.dispatch.rules.base import PayloadRule, StateRule
+from vkbottle.dispatch.rules.base import PayloadRule, StateRule, TextRule
 
 from bot import bot, tasks_in_creation
 from db_engine import async_session_maker
@@ -14,8 +14,7 @@ create_task_labeler: BotLabeler = BotLabeler()
 @create_task_labeler.message(
     OrRule(
         AndRule(
-            PayloadRule({'cmd': 'create_task'}),
-            StateRule(UserStates.IN_MAIN_MENU)
+            PayloadRule({'cmd': 'create_task'})
         ),
         StateRule(
             [
@@ -26,7 +25,8 @@ create_task_labeler: BotLabeler = BotLabeler()
             ]
         )
     ),
-    NotRule(PayloadRule({'cmd': 'main_menu'}))
+    NotRule(PayloadRule({'cmd': 'main_menu'})),
+    NotRule(TextRule('/start'))
 )
 async def create_task_handler(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
@@ -36,10 +36,15 @@ async def create_task_handler(message: Message):
         tasks_in_creation[message.from_id] = TasksModel(user_id=message.from_id)
         print(tasks_in_creation[message.from_id], tasks_in_creation[message.from_id].id, tasks_in_creation[message.from_id].title)
         await message.answer(
-            'Введите заголовок задачи: ',
+            'Введите заголовок задачи (длина не более 50 символов): ',
             keyboard=KC.back_main_menu_keyboard()
         )
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_TITLE}':
+        if len(message.text) > 50:
+            await message.answer(
+                "Длина заголовка превышает 50 символов. Попробуйте еще раз."
+            )
+            return
         await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_CREATE_TASK_DESCRIPTION)
         tasks_in_creation[message.from_id].title = message.text
         await message.answer(
