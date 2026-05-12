@@ -5,6 +5,7 @@ import selectors
 import sys
 import os
 import vkbottle as vk
+from aiohttp import web
 from vkbottle import GroupEventType
 from vkbottle.bot import Message, MessageEvent
 
@@ -12,7 +13,7 @@ from sqlalchemy import MetaData, text, select
 
 from bot import bot, tasks_in_creation, tasks_list_params
 from db_engine import sync_engine, async_engine, async_session_maker
-from globals import DB_URL, BOT_TOKEN
+from globals import *
 from logic import empty_callback_answer
 from models import *
 from keyboards import KeyboardCreator as KC
@@ -96,7 +97,7 @@ async def start(message: Message):
 
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def unknown_event(event: MessageEvent):
-    asyncio.sleep(0.4)
+    await asyncio.sleep(0.4)
     await empty_callback_answer(event)
 
 @bot.on.message()
@@ -110,7 +111,6 @@ async def unknown_message(message: Message):
     )
 
 # ============== ЗАПУСК БОТА ==============
-
 def get_polling_method() -> str:
     """
     Получить метод работы бота из переменных окружения или интерактивного выбора.
@@ -122,7 +122,7 @@ def get_polling_method() -> str:
     Returns:
         'longpoll' или 'callback'
     """
-    method = os.getenv('POLLING_METHOD', '').lower()
+    method = POLLING_METHOD.lower()
     
     if method in POLLING_METHODS:
         return method
@@ -162,11 +162,13 @@ def run_longpoll():
 
 def run_callback():
     """Запуск бота с использованием CallbackAPI (Webhook)"""
-    host = os.getenv("WEBHOOK_HOST", "0.0.0.0")
-    port = int(os.getenv("WEBHOOK_PORT", 8080))
-    path = os.getenv("WEBHOOK_PATH", "/")
-    base_url = os.getenv("BASE_URL")
-    secret_key = os.getenv("WEBHOOK_SECRET")
+    host = WEBHOOK_HOST
+    port = WEBHOOK_PORT
+    path = WEBHOOK_PATH
+    base_url = BASE_URL
+    # secret_key = WEBHOOK_SECRET
+    secret_key = None
+    confirmation_code = VK_CONFIRMATION_CODE
     
     print("\n" + "="*50)
     print(f"🚀 Запуск бота в режиме: {POLLING_METHODS['callback']}")
@@ -192,18 +194,29 @@ def run_callback():
     print("Для остановки нажмите Ctrl+C")
     print("="*50 + "\n")
     
-    # Запускаем сервер с вебхуком
-    bot.run_webhook(
-        host=host,
-        port=port,
-        path=path,
-        webhook_settings={
-            "url": f"{base_url}{path}",
-            "secret": secret_key
-        }
-    )
+    async def handle_vk(request: web.Request) -> web.Response:
+        try:
+            data = await request.json()
+        except Exception:
+            return web.Response(status=400, text="bad request")
 
-if __name__ == '__main__':
+        if secret_key and data.get("secret") != secret_key:
+            return web.Response(status=403, text="forbidden")
+
+        if data.get("type") == "confirmation":
+            return web.Response(text=confirmation_code)
+
+        await bot.process_event(data)
+        return web.Response(text="ok")
+
+    app = web.Application()
+    app.router.add_post(path, handle_vk)
+    web.run_app(app, host=host, port=port)
+
+if __name__ == 'main':
+    asyncio.run(
+            recreate_db()
+        )
     polling_method = get_polling_method()
     
     if polling_method == 'longpoll':
