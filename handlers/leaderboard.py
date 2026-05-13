@@ -34,6 +34,7 @@ leaderboard_labeler.custom_rules['custom_state'] = CustomStateRule
 async def leaderboard_enter_handler(message: Message):
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_LEADERBOARD_GLOBAL)
     answer = await get_global_leaderboard()
+    print(answer, 'это answer в обработчике входа в таблицу лидеров')
     await message.answer(
         "Таблица лидеров",
         keyboard=KC.back_main_menu_keyboard()

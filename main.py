@@ -11,7 +11,6 @@ from sqlalchemy import MetaData, text, select
 
 from bot import bot, tasks_in_creation, tasks_list_params
 from db_engine import sync_engine, async_engine, async_session_maker
-from globals import DB_URL, BOT_TOKEN
 from logic import empty_callback_answer
 from models import *
 from keyboards import KeyboardCreator as KC
@@ -108,8 +107,8 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         # Обновление схемы базы данных
         # asyncio.run(
-        #     recreate_db(),
-        #     loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
+            # recreate_db(),
+            # loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
         # )
         # asyncio.set_event_loop(asyncio.SelectorEventLoop())
         bot.loop_wrapper.loop = asyncio.SelectorEventLoop()

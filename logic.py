@@ -6,6 +6,7 @@ from sqlalchemy import select, and_
 
 from bot import bot, tasks_list_params
 from db_engine import async_session_maker
+from globals import STEP_LEVEL # 300
 from models import TasksModel, UserCountersModel, TypeEnum, DifficulcyEnum
 
 if TYPE_CHECKING:
@@ -13,7 +14,23 @@ if TYPE_CHECKING:
 
 # Получает текущий уровень пользователя на основе его опыта
 def get_level(xp: int):
-    pass
+    return int(
+        (STEP_LEVEL + (STEP_LEVEL**2 + 4 * STEP_LEVEL * 2 * xp)**0.5) / (2 * STEP_LEVEL)
+    )
+
+# Получает количество опыта, необходимое для достижения следующего уровня
+def get_need_xp_for_next_level(level: int):
+    return STEP_LEVEL * level
+
+# Получает общее количество опыта, необходимое для достижения следующего уровня
+def get_all_xp_on_this_level(level: int):
+    return int(
+        ((STEP_LEVEL * (level - 1)) / 2) * level
+    )
+
+def get_curr_xp_for_next_level(xp: int):
+    this_level_xp = get_all_xp_on_this_level(get_level(xp))
+    return xp - this_level_xp
 
 # Формирует строку Имя Фамилия
 def get_full_name(first_name: str, last_name: str):
@@ -21,9 +38,10 @@ def get_full_name(first_name: str, last_name: str):
 
 # Метод формирует одну строку для таблицы лидеров
 def get_leaderboard_row(user: UserModel, idx: int):
+    print(get_level(user.current_xp))
     return (
-        '%i. [id%i|%s] - %i очков опыта\n' % 
-        (idx+1, user.id, get_full_name(user.first_name, user.last_name), user.current_xp)
+        '%i. [id%i|%s] - %i уровень\n'
+        % (idx+1, user.id, get_full_name(user.first_name, user.last_name), get_level(user.current_xp))
     )
 
 async def get_task(user_id: int) -> TasksModel:

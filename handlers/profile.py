@@ -4,7 +4,12 @@ from vkbottle.bot import BotLabeler, Message, MessageEvent
 from vkbottle.tools.formatting import bold, Format
 
 from bot import bot
-from logic import get_full_name
+from logic import (
+    get_full_name,
+    get_level,
+    get_need_xp_for_next_level,
+    get_curr_xp_for_next_level
+)
 from states import UserStates
 from keyboards import KeyboardCreator as KC
 from db_engine import async_session_maker
@@ -44,7 +49,8 @@ async def get_profile_info(user_id: int):
         bold(get_full_name(user.first_name, user.last_name)) +
         (
             '\n\n'
-            f'Количество опыта: {user.current_xp}\n'
+            f'Уровень: {get_level(user.current_xp)}\n'
+            f'{get_curr_xp_for_next_level(user.current_xp)}/{get_need_xp_for_next_level(get_level(user.current_xp))} опыта до следующего уровня\n'
             f'Выполнено очень лёгких задач: {user_counters.very_easy}\n'
             f'Выполнено лёгких задач: {user_counters.easy}\n'
             f'Выполнено средних задач: {user_counters.medium}\n'
