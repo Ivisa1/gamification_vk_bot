@@ -39,6 +39,7 @@ async def check_user_reg(user_id: int):
         print(user)
         return bool(user)
 
+seconds_before_new_day = 86400
 @bot.loop_wrapper.interval(seconds=20000)
 async def interval_func():
     async with async_engine.begin() as aconn:
