@@ -4,12 +4,13 @@ import asyncio
 import selectors
 import sys
 import os
+
 import vkbottle as vk
 from aiohttp import web
 from vkbottle import GroupEventType
 from vkbottle.bot import Message, MessageEvent
 
-from sqlalchemy import MetaData, text, select
+from sqlalchemy import MetaData, text, select, inspect
 
 from bot import bot, tasks_in_creation, tasks_list_params
 from db_engine import sync_engine, async_engine, async_session_maker
@@ -213,9 +214,10 @@ def run_callback():
     app.router.add_post(path, handle_vk)
     web.run_app(app, host=host, port=port)
 
-if __name__ == 'main':
+if __name__ == '__main__':
     asyncio.run(
-            recreate_db()
+            recreate_db(),
+            loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
         )
     polling_method = get_polling_method()
     
