@@ -36,7 +36,7 @@ async def create_task_handler(message: Message):
         tasks_in_creation[message.from_id] = TasksModel(user_id=message.from_id)
         print(tasks_in_creation[message.from_id], tasks_in_creation[message.from_id].id, tasks_in_creation[message.from_id].title)
         await message.answer(
-            'Введите заголовок задачи (длина не более 50 символов): ',
+            '✍️ Введите заголовок задачи (длина не более 50 символов): ',
             keyboard=KC.back_main_menu_keyboard()
         )
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_TITLE}':
@@ -48,7 +48,7 @@ async def create_task_handler(message: Message):
         await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_CREATE_TASK_DESCRIPTION)
         tasks_in_creation[message.from_id].title = message.text
         await message.answer(
-            'Введите описание задачи (введите ".", чтобы оставить поле пустым): '
+            '📄 Введите описание задачи (введите ".", чтобы оставить поле пустым): '
         )
         print(tasks_in_creation)
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_DESCRIPTION}':
@@ -56,7 +56,7 @@ async def create_task_handler(message: Message):
         if message.text != '.':
             tasks_in_creation[message.from_id].description = message.text
         await message.answer(
-            'Введите тип задачи (1 - одноразовая, 2 - повторяющаяся): '
+            '⚙️ Введите тип задачи (1 - одноразовая, 2 - повторяющаяся): '
         )
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_TYPE}':
         if message.text not in ('1', '2'):
@@ -71,7 +71,7 @@ async def create_task_handler(message: Message):
             tasks_in_creation[message.from_id].type = TypeEnum.REUSABLE
             await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_CREATE_TASK_DIFFICULCY)
         await message.answer(
-            'Введите сложность задачи (1 - очень легко, 2 - легко, 3 - средне, 4 - сложно, 5 - очень сложно):'
+            '📊 Введите сложность задачи (1 - очень легко, 2 - легко, 3 - средне, 4 - сложно, 5 - очень сложно):'
         )
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_DIFFICULCY}':
         match message.text:

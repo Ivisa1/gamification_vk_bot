@@ -176,11 +176,20 @@ async def edit_show_tasks(event: MessageEvent):
                 if tasks_list_params[user_id]['curr_offset'] != 0:
                     tasks_list_params[user_id]['curr_offset'] -= 1
                 tasks_list_params[user_id]['tasks_count'] -= 1
+            await event.send_message(
+                (
+                    'Задача выполнена.\nВы получили ' + str(how_much_xp(tasks_list_params[user_id]['curr_task'].difficulcy)) + 
+                    ' опыта ⭐'
+                )
+            )
         case 'delete':
             await delete_task(tasks_list_params[user_id]['curr_task'])
             tasks_list_params[user_id]['tasks_count'] -= 1
             if tasks_list_params[user_id]['curr_offset'] != 0:
                 tasks_list_params[user_id]['curr_offset'] -= 1
+            await event.send_message(
+                '🗑️ Задача удалена'
+            )
         case _:
             pass
     if tasks_list_params[user_id]['tasks_count'] == 0:

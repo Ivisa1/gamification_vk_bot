@@ -38,10 +38,10 @@ def get_full_name(first_name: str, last_name: str):
 
 # Метод формирует одну строку для таблицы лидеров
 def get_leaderboard_row(user: UserModel, idx: int):
-    print(get_level(user.current_xp))
+    sticker_place = '🥇' if idx==0 else '🥈' if idx==1 else '🥉' if idx==2 else '🎖️'
     return (
-        '%i. [id%i|%s] - %i уровень\n'
-        % (idx+1, user.id, get_full_name(user.first_name, user.last_name), get_level(user.current_xp))
+        '%s %i. [id%i|%s] - %i уровень\n'
+        % (sticker_place, idx+1, user.id, get_full_name(user.first_name, user.last_name), get_level(user.current_xp))
     )
 
 async def get_task(user_id: int) -> TasksModel:
@@ -65,11 +65,11 @@ async def get_task(user_id: int) -> TasksModel:
     
 def show_task(task: TasksModel) -> str:
     str_task_info = (
-        f'Описание: {task.description if task.description else 'Нет описания'}\n'
-        f'Тип задачи: {ru_types[task.type.value]}\n'
-        f'Сложность задачи: {ru_difficulties[task.difficulcy.value]}\n\n'
+        bold(f'🎯 {task.title}\n\n') +
+        'Описание: ' + italic(f'{task.description if task.description else "Нет описания"}\n') +
+        'Тип задачи: ' + italic(f'{ru_types[task.type.value]}\n') +
+        'Сложность задачи: ' + italic(f'{ru_difficulties[task.difficulcy.value]}\n\n')
     )
-    str_task_info = bold(f'{task.title}\n\n') + str_task_info + italic('test')
     return str_task_info
 
 # Отправляет пустой ответ на нажатие callback кнопки (чтобы кнопка снова стала кликабельной)

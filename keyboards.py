@@ -29,17 +29,17 @@ class KeyboardCreator():
     def main_menu_keyboard():
         return (
             vk.Keyboard(inline=False)
-            .add(vk.Text('Создать задачу', payload={'cmd': 'create_task'}), color=color.PRIMARY)
-            .add(vk.Text('Просмотреть задачи', payload={'cmd': 'tasks_filters'}), color=color.SECONDARY)
+            .add(vk.Text('✏️ Создать задачу', payload={'cmd': 'create_task'}), color=color.PRIMARY)
+            .add(vk.Text('📋 Просмотреть задачи', payload={'cmd': 'tasks_filters'}), color=color.SECONDARY)
             .row()
-            .add(vk.Text('Мой профиль', payload={'cmd': 'my_profile'}), color=color.SECONDARY)
-            .add(vk.Text('Таблица лидеров', payload={'cmd': 'leaderboard'}), color=color.SECONDARY)
+            .add(vk.Text('👤 Мой профиль', payload={'cmd': 'my_profile'}), color=color.SECONDARY)
+            .add(vk.Text('🏆 Таблица лидеров', payload={'cmd': 'leaderboard'}), color=color.SECONDARY)
         )
     
     def back_main_menu_keyboard():
         return (
             vk.Keyboard(inline=False)
-            .add(vk.Text('Вернуться в главное меню', payload={'cmd': 'main_menu'}))
+            .add(vk.Text('🔙 Вернуться в главное меню', payload={'cmd': 'main_menu'}))
         )
     
     def choose_tasks_keyboard(
@@ -102,7 +102,7 @@ class KeyboardCreator():
             .row()
             .add(
                 vk.Text(
-                    'Показать задачи',
+                    '📚 Показать задачи',
                     payload=payload_for_choose_tasks_keyboard(types, difficulties)
                 ),
                 color=color.POSITIVE
@@ -127,19 +127,19 @@ class KeyboardCreator():
     def task_keyboard(user_info, task_id: int):
         keyboard = vk.Keyboard(inline=True)
         if user_info['curr_offset']:
-            keyboard.add(vk.Callback('<', payload={'task': 'prev'}), color=color.PRIMARY)
+            keyboard.add(vk.Callback('⬅️', payload={'task': 'prev'}), color=color.PRIMARY)
         if user_info['curr_offset']+1 < user_info['tasks_count']:
-            keyboard.add(vk.Callback('>', payload={'task': 'next'}), color=color.PRIMARY)
+            keyboard.add(vk.Callback('➡️', payload={'task': 'next'}), color=color.PRIMARY)
         keyboard.row()
         # Дописать кнопки для управления задачами
-        keyboard.add(vk.Callback('Выполнить', payload={'task': 'complete'}), color=color.POSITIVE)
-        keyboard.add(vk.Callback('Удалить', payload={'task': 'delete'}), color=color.NEGATIVE)
+        keyboard.add(vk.Callback('✅ Выполнить', payload={'task': 'complete'}), color=color.POSITIVE)
+        keyboard.add(vk.Callback('❌ Удалить', payload={'task': 'delete'}), color=color.NEGATIVE)
         return keyboard
 
     def back_to_choose_tasks_keyboard(params):
         return (
             vk.Keyboard(inline=False)
-            .add(vk.Text('Вернуться к выбору задач', payload={'cmd': 'tasks_filters', 'params': params}))
+            .add(vk.Text('🔙 Вернуться к выбору задач', payload={'cmd': 'tasks_filters', 'params': params}))
         )
 
 def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict[str, bool], level_1: str = None, level_2: str = None):

@@ -44,7 +44,6 @@ async def interval_func():
     async with async_engine.begin() as aconn:
         res = await aconn.execute(text('SELECT VERSION();'))
         print(res.all())
-    print('Я выполнилась')
 
 @bot.on.message(payload={'cmd': 'main_menu'})
 async def main_menu_return_handler(message: Message):
@@ -60,7 +59,8 @@ async def main_menu_return_handler(message: Message):
 async def start(message: Message):
     # Проверка на то, что пользователь уже есть в БД
     if not await check_user_reg(message.from_id):
-        async with async_session_maker.begin() as session:
+        async with async_session_maker() as session:
+            print('Регистрация пользователя')
             user_data = await bot.api.users.get(user_ids=[message.from_id])
             first_name = user_data[0].first_name
             last_name = user_data[0].last_name
@@ -68,7 +68,7 @@ async def start(message: Message):
                 id=message.from_id,
                 first_name=first_name,
                 last_name=last_name,
-                
+                current_xp=0
             )
             session.add(user)
             await session.flush()
@@ -76,12 +76,9 @@ async def start(message: Message):
                 id=message.from_id
             )
             session.add(user_counters)
-            print('Выполнилось без ошибок')
-            print(user.first_name, user.last_name)
-            
-            # await session.commit()
-            
-            # aconn.execute()
+            await session.commit()
+            print('Пользователь зарегистрирован')
+
     user_id = message.from_id
     tasks_in_creation.pop(user_id, None)
     tasks_list_params.pop(user_id, None)

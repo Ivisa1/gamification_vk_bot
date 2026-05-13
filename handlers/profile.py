@@ -1,7 +1,7 @@
 from sqlalchemy import select
 import vkbottle as vk
 from vkbottle.bot import BotLabeler, Message, MessageEvent
-from vkbottle.tools.formatting import bold, Format
+from vkbottle.tools.formatting import bold, Format, italic
 
 from bot import bot
 from logic import (
@@ -21,7 +21,7 @@ profile_labeler: BotLabeler = BotLabeler()
 async def profile_enter_handler(message: Message):
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_PROFILE)
     await message.answer(
-        "Ваш профиль",
+        "👤 Ваш профиль",
         keyboard=KC.back_main_menu_keyboard()
     )
     await message.answer(
@@ -47,15 +47,19 @@ async def get_profile_info(user_id: int):
         user_counters = result.scalar_one_or_none()
     profile_info = (
         bold(get_full_name(user.first_name, user.last_name)) +
+        italic(
+            (
+                '\n\n'
+                f'🎓 Уровень {get_level(user.current_xp)}\n'
+                f'⭐ {get_curr_xp_for_next_level(user.current_xp)}/{get_need_xp_for_next_level(get_level(user.current_xp))} опыта до следующего уровня ⭐\n\n'
+            )
+        ) +
         (
-            '\n\n'
-            f'Уровень: {get_level(user.current_xp)}\n'
-            f'{get_curr_xp_for_next_level(user.current_xp)}/{get_need_xp_for_next_level(get_level(user.current_xp))} опыта до следующего уровня\n'
-            f'Выполнено очень лёгких задач: {user_counters.very_easy}\n'
-            f'Выполнено лёгких задач: {user_counters.easy}\n'
-            f'Выполнено средних задач: {user_counters.medium}\n'
-            f'Выполнено сложных задач: {user_counters.hard}\n'
-            f'Выполнено очень сложных задач: {user_counters.very_hard}\n'
+            f'😄 Выполнено очень лёгких задач: {user_counters.very_easy}\n'
+            f'🙂 Выполнено лёгких задач: {user_counters.easy}\n'
+            f'😐 Выполнено средних задач: {user_counters.medium}\n'
+            f'😬 Выполнено сложных задач: {user_counters.hard}\n'
+            f'🤯 Выполнено очень сложных задач: {user_counters.very_hard}\n'
         )
     )
     return profile_info
