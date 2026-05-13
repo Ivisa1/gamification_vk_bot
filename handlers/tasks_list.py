@@ -53,7 +53,7 @@ async def tasks_list_enter_handler(message: Message):
     NotRule(rules.PayloadRule({'cmd': 'main_menu'}))
 )
 async def change_tasks_panel(event: MessageEvent):
-    await empty_callback_answer(event)
+    await a_sleep(0.4)
     await bot.api.messages.edit(
         peer_id=event.peer_id,
         cmid=event.object.conversation_message_id,
@@ -66,6 +66,7 @@ async def change_tasks_panel(event: MessageEvent):
             difficulties=event.payload['difficulties']
         )
     )
+    await empty_callback_answer(event)
 
 @tasks_list_labeler.message(
     OrRule(

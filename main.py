@@ -34,7 +34,6 @@ async def check_user_reg(user_id: int):
         )
         user = result.scalar_one_or_none()
         
-        # 3. Печатаем и возвращаем результат
         print(user)
         return bool(user)
 
@@ -86,7 +85,7 @@ async def start(message: Message):
 
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def unknown_event(event: MessageEvent):
-    asyncio.sleep(0.4)
+    await asyncio.sleep(0.4)
     await empty_callback_answer(event)
 
 @bot.on.message()
