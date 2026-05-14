@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import List
 import vkbottle as vk
 from vkbottle import AndRule, OrRule
@@ -33,7 +33,7 @@ leaderboard_labeler.custom_rules['custom_state'] = CustomStateRule
 )
 async def leaderboard_enter_handler(message: Message):
     await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_LEADERBOARD_GLOBAL)
-    answer = await get_global_leaderboard()
+    answer = await get_global_leaderboard(message.from_id)
     print(answer, 'это answer в обработчике входа в таблицу лидеров')
     await message.answer(
         "Таблица лидеров",
@@ -66,7 +66,7 @@ async def leaderboard_in_handler(event: MessageEvent):
         await bot.api.messages.edit(
             event.peer_id,
             cmid=event.conversation_message_id,
-            message=await get_global_leaderboard(),
+            message=await get_global_leaderboard(event.user_id),
             keyboard=KC.in_leaderboard_keyboard('global')
         )
         print('вывод global')
@@ -84,15 +84,35 @@ async def leaderboard_in_handler(event: MessageEvent):
     await empty_callback_answer(event)
 
 # Выдает глобальную таблицу лидеров
-async def get_global_leaderboard():
+async def get_global_leaderboard(user_id: int):
     answer = ''
     async with async_session_maker() as session:
-        stmt = select(UserModel.id, UserModel.first_name, UserModel.last_name, UserModel.current_xp).order_by(UserModel.current_xp.desc()).limit(15)
+        stmt = (
+            select(
+                UserModel.id, UserModel.first_name, UserModel.last_name, UserModel.current_xp
+            )
+            .order_by(UserModel.current_xp.desc())
+            .limit(15)
+        )
         result = await session.execute(stmt)
         users: List[UserModel] = result.all()
-        print(users)
+        user_in_leaderboard = False
         for idx, user in enumerate(users):
+            if user.id == user_id:
+                user_in_leaderboard = True
             answer = answer + get_leaderboard_row(user, idx)
+        if not user_in_leaderboard:
+            sub_stmt = (
+                select(UserModel, func.row_number().over(order_by=UserModel.current_xp.desc()).label('rank'))
+            )
+            stmt = (
+                select('*')
+                .select_from(sub_stmt)
+                .where(sub_stmt.c.id == user_id)
+            )
+            curr_user = (await session.execute(stmt)).fetchone()
+            print(curr_user, type(curr_user))
+            answer =  answer + '➖➖➖➖➖➖➖➖➖➖➖➖\n' + get_leaderboard_row(curr_user, curr_user.rank - 1) + '\n'
     return answer
 
 # Выдает таблицу лидеров друзей (включая пользователя)
@@ -111,9 +131,25 @@ async def get_friends_leaderboard(user_id: int):
             select(UserModel.id, UserModel.first_name, UserModel.last_name, UserModel.current_xp)
             .where(UserModel.id.in_(friends))
             .order_by(UserModel.current_xp.desc())
+            .limit(15)
         )
         result = await session.execute(stmt)
         users: List[UserModel] = result.all()
+        user_in_leaderboard = False
         for idx, user in enumerate(users):
+            if user.id == user_id:
+                user_in_leaderboard = True
             answer = answer + get_leaderboard_row(user, idx)
+        if not user_in_leaderboard:
+            sub_stmt = (
+                select(UserModel, func.row_number().over(order_by=UserModel.current_xp.desc()).label('rank'))
+            )
+            stmt = (
+                select('*')
+                .select_from(sub_stmt)
+                .where(sub_stmt.c.id == user_id)
+            )
+            curr_user = (await session.execute(stmt)).fetchone()
+            print(curr_user, type(curr_user))
+            answer =  answer + '➖➖➖➖➖➖➖➖➖➖➖➖\n' + get_leaderboard_row(curr_user, curr_user.rank - 1) + '\n'
     return answer

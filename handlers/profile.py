@@ -51,7 +51,7 @@ async def get_profile_info(user_id: int):
             (
                 '\n\n'
                 f'🎓 Уровень {get_level(user.current_xp)}\n'
-                f'⭐ {get_curr_xp_for_next_level(user.current_xp)}/{get_need_xp_for_next_level(get_level(user.current_xp))} опыта до следующего уровня ⭐\n\n'
+                f'⭐ {get_curr_xp_for_next_level(user.current_xp)}/{get_need_xp_for_next_level(get_level(user.current_xp))} опыта до следующего уровня\n\n'
             )
         ) +
         (

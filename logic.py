@@ -38,7 +38,7 @@ def get_full_name(first_name: str, last_name: str):
 
 # Метод формирует одну строку для таблицы лидеров
 def get_leaderboard_row(user: UserModel, idx: int):
-    sticker_place = '🥇 ' if idx==0 else '🥈 ' if idx==1 else '🥉 ' if idx==2 else '🎖️ '
+    sticker_place = '🥇 ' if idx==0 else '🥈 ' if idx==1 else '🥉 ' if idx==2 else '🎖️ ' if idx > 14 else '   '
     return (
         '%s%i. [id%i|%s] - %i уровень\n'
         % (sticker_place, idx+1, user.id, get_full_name(user.first_name, user.last_name), get_level(user.current_xp))
