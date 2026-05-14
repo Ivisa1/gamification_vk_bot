@@ -44,7 +44,7 @@ class UserModel(BaseModel):
     first_name: Mapped[str] = mapped_column(String, nullable=False) # Имя
     last_name: Mapped[str] = mapped_column(String, nullable=False) # Фамилия
     current_xp: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, server_default=DefaultClause('0')) # Опыт пользователя
-    is_public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=DefaultClause('false')) # Будет ли появляться пользователь в таблице лидеров
+    is_public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=DefaultClause('false')) # Будет ли появляться пользователь в глобальной таблице лидеров
 
 # Модель пользовательских задач
 class TasksModel(BaseModel):

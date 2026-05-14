@@ -88,8 +88,11 @@ async def get_global_leaderboard(user_id: int):
     answer = ''
     async with async_session_maker() as session:
         stmt = (
-            select(
-                UserModel.id, UserModel.first_name, UserModel.last_name, UserModel.current_xp
+            select(UserModel)
+            .where(UserModel.is_public == True)
+            .union(
+                select(UserModel)
+                .where(UserModel.id==user_id)
             )
             .order_by(UserModel.current_xp.desc())
             .limit(15)

@@ -32,6 +32,13 @@ def get_curr_xp_for_next_level(xp: int):
     this_level_xp = get_all_xp_on_this_level(get_level(xp))
     return xp - this_level_xp
 
+async def get_user(user_id: int):
+    async with async_session_maker() as session:
+        stmt = (
+            select(UserModel)
+            .where(UserModel.id==user_id)
+        )
+
 # Формирует строку Имя Фамилия
 def get_full_name(first_name: str, last_name: str):
     return f'{first_name} {last_name}'

@@ -142,6 +142,22 @@ class KeyboardCreator():
             .add(vk.Text('🔙 Вернуться к выбору задач', payload={'cmd': 'tasks_filters', 'params': params}))
         )
 
+    def profile_keyboard(is_public: bool):
+        return (
+            vk.Keyboard(inline=True)
+            .add(
+                vk.Callback(
+                    label=(  
+                        '🔓 Публичный профиль'
+                        if is_public else
+                        '🔒 Приватный профиль'
+                    ),
+                    payload={'cmd': 'change_visibility'}
+                ),
+                color=color.PRIMARY if is_public else color.SECONDARY
+            )
+        )
+
 def payload_for_choose_tasks_keyboard(types: Dict[str, bool], difficulties: Dict[str, bool], level_1: str = None, level_2: str = None):
     """
     Возвращает payload для кнопок из раздела фильтрации необходимых для вывода задач
