@@ -1,3 +1,4 @@
+from asyncio import sleep as a_sleep
 from sqlalchemy import select
 import vkbottle as vk
 from vkbottle.bot import BotLabeler, Message, MessageEvent, rules
@@ -9,7 +10,8 @@ from logic import (
     get_full_name,
     get_level,
     get_need_xp_for_next_level,
-    get_curr_xp_for_next_level
+    get_curr_xp_for_next_level,
+    empty_callback_answer
 )
 from states import UserStates
 from keyboards import KeyboardCreator as KC
@@ -49,6 +51,7 @@ async def profile_enter_handler(message: Message):
     CustomStateRule(UserStates.IN_PROFILE)
 )
 async def change_visibility_handler(event: MessageEvent):
+    await a_sleep(0.4)
     user_id = event.peer_id
     user: UserModel = await get_user(user_id)
     async with async_session_maker() as session:
@@ -60,6 +63,7 @@ async def change_visibility_handler(event: MessageEvent):
         await get_profile_info(user_id),
         keyboard=KC.profile_keyboard(user.is_public)
     )
+    await empty_callback_answer(event)
 
 async def get_profile_info(user_id: int):
     user: UserModel | None = None

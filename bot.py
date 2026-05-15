@@ -2,7 +2,7 @@ from typing import Dict, List
 import vkbottle as vk
 
 from globals import BOT_TOKEN, SERVICE_TOKEN
-from models import TasksModel, UserModel, TypeEnum, DifficulcyEnum
+from models import TasksModel, UserModel, TypeEnum, DifficultyEnum
 
 # Экземпляр бота
 bot: vk.Bot = vk.Bot(BOT_TOKEN)
@@ -19,7 +19,7 @@ tasks_in_creation: Dict[int, UserModel] = {}
 # tasks_count - количество задач, соответствующих фильтрам
 # curr_offset - порядковый номер текущей задачи, которая отображается пользователю (начинается с нуля)
 # curr_task - объект текущей отображаемой задачи
-tasks_list_params: Dict[int, Dict[str, int | TasksModel | List[TypeEnum] | List[DifficulcyEnum]]] = {}
+tasks_list_params: Dict[int, Dict[str, int | TasksModel | List[TypeEnum] | List[DifficultyEnum]]] = {}
 
 from handlers import labelers
 

@@ -12,7 +12,7 @@ from typing import Annotated
 ### ПЕРЕЧИСЛЕНИЯ ДЛЯ ЗНАЧЕНИЙ МОДЕЛИ ###
 
 # Пример, как делать Enum: https://habr.com/ru/companies/amvera/articles/849836/
-class DifficulcyEnum(str, enum.Enum):
+class DifficultyEnum(str, enum.Enum):
     VERY_EASY = 'very_easy'
     EASY = 'easy'
     MEDIUM = 'medium'
@@ -24,8 +24,8 @@ class TypeEnum(str, enum.Enum):
     REUSABLE = 'reusable'
 
 
-print(DifficulcyEnum.VERY_EASY)
-print(DifficulcyEnum('very_easy'))
+print(DifficultyEnum.VERY_EASY)
+print(DifficultyEnum('very_easy'))
 
 
 ### ТИПЫ ДЛЯ АННОТАЦИЙ
@@ -54,9 +54,9 @@ class TasksModel(BaseModel):
     user_id: Mapped[int] = mapped_column(ForeignKey(column='users.id', ondelete='CASCADE'))
     title: Mapped[str] = mapped_column(String(50), nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=True)
-    difficulcy: Mapped[DifficulcyEnum] = mapped_column(
-        SQLAlchemyEnum(DifficulcyEnum, name='difficulcy_level'),
-        default=DifficulcyEnum.VERY_EASY,
+    difficulty: Mapped[DifficultyEnum] = mapped_column(
+        SQLAlchemyEnum(DifficultyEnum, name='difficulty_level'),
+        default=DifficultyEnum.VERY_EASY,
         nullable=False
     )
     type: Mapped[TypeEnum] = mapped_column(

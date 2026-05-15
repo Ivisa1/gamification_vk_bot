@@ -7,7 +7,7 @@ from sqlalchemy import select, and_
 from bot import bot, tasks_list_params
 from db_engine import async_session_maker
 from globals import STEP_LEVEL # 300
-from models import TasksModel, UserCountersModel, TypeEnum, DifficulcyEnum
+from models import TasksModel, UserCountersModel, TypeEnum, DifficultyEnum
 
 if TYPE_CHECKING:
     from models import UserModel
@@ -59,7 +59,7 @@ async def get_task(user_id: int) -> TasksModel:
                 and_(
                     TasksModel.user_id==user_id,
                     TasksModel.type.in_(tasks_list_params[user_id]['types']),
-                    TasksModel.difficulcy.in_(tasks_list_params[user_id]['difficulties'])
+                    TasksModel.difficulty.in_(tasks_list_params[user_id]['difficulties'])
                 )
             )
             .order_by(TasksModel.id.asc())
@@ -75,7 +75,7 @@ def show_task(task: TasksModel) -> str:
         bold(f'🎯 {task.title}\n\n') +
         'Описание: ' + italic(f'{task.description if task.description else "Нет описания"}\n') +
         'Тип задачи: ' + italic(f'{ru_types[task.type.value]}\n') +
-        'Сложность задачи: ' + italic(f'{ru_difficulties[task.difficulcy.value]}\n\n')
+        'Сложность задачи: ' + italic(f'{ru_difficulties[task.difficulty.value]}\n\n')
     )
     return str_task_info
 
@@ -89,33 +89,33 @@ async def empty_callback_answer(event: MessageEvent):
     )
 
 async def add_xp(task: TasksModel):
-    amount = how_much_xp(task.difficulcy)
+    amount = how_much_xp(task.difficulty)
     return 
 
 def how_much_xp(difficulty):
     match difficulty:
-        case DifficulcyEnum.VERY_EASY:
+        case DifficultyEnum.VERY_EASY:
             return 100
-        case DifficulcyEnum.EASY:
+        case DifficultyEnum.EASY:
             return 200
-        case DifficulcyEnum.MEDIUM:
+        case DifficultyEnum.MEDIUM:
             return 300
-        case DifficulcyEnum.HARD:
+        case DifficultyEnum.HARD:
             return 400
-        case DifficulcyEnum.VERY_HARD:
+        case DifficultyEnum.VERY_HARD:
             return 500
 
 def increment_counter(task: TasksModel, user_counters: UserCountersModel):
-    match task.difficulcy:
-        case DifficulcyEnum.VERY_EASY:
+    match task.difficulty:
+        case DifficultyEnum.VERY_EASY:
             user_counters.very_easy += 1
-        case DifficulcyEnum.EASY:
+        case DifficultyEnum.EASY:
             user_counters.easy += 1
-        case DifficulcyEnum.MEDIUM:
+        case DifficultyEnum.MEDIUM:
             user_counters.medium += 1
-        case DifficulcyEnum.HARD:
+        case DifficultyEnum.HARD:
             user_counters.hard += 1
-        case DifficulcyEnum.VERY_HARD:
+        case DifficultyEnum.VERY_HARD:
             user_counters.very_hard += 1
 
 # Переводы сложностей задач на английский

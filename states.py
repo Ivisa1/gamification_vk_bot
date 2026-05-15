@@ -19,5 +19,5 @@ class UserStates(BaseStateGroup):
     # Состояния во время создания задачи
     IN_CREATE_TASK_TITLE = 'in_create_task_title'
     IN_CREATE_TASK_DESCRIPTION = 'in_create_task_description'
-    IN_CREATE_TASK_DIFFICULCY = 'in_create_task_difficulcy'
+    IN_CREATE_TASK_DIFFICULCY = 'in_create_task_difficulty'
     IN_CREATE_TASK_TYPE = 'in_create_task_type'

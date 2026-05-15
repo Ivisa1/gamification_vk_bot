@@ -148,13 +148,13 @@ class KeyboardCreator():
             .add(
                 vk.Callback(
                     label=(  
-                        '🔓 Публичный профиль'
+                        '🔓 Текущий статус - публичный'
                         if is_public else
-                        '🔒 Приватный профиль'
+                        '🔒 Текущий статус - приватный'
                     ),
                     payload={'cmd': 'change_visibility'}
                 ),
-                color=color.PRIMARY if is_public else color.SECONDARY
+                color=color.POSITIVE if is_public else color.SECONDARY
             )
         )
 

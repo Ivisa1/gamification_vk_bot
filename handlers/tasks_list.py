@@ -10,7 +10,7 @@ from bot import bot, tasks_list_params
 from db_engine import async_session_maker
 from randomiser import randomiser
 from logic import empty_callback_answer, get_task, show_task, add_xp, how_much_xp, increment_counter
-from models import TasksModel, UserModel, UserCountersModel, TypeEnum, DifficulcyEnum
+from models import TasksModel, UserModel, UserCountersModel, TypeEnum, DifficultyEnum
 from states import UserStates
 from keyboards import KeyboardCreator as KC
 
@@ -92,17 +92,17 @@ async def show_tasks(message: Message):
                 types_list.append(TypeEnum(type_))
         print(types_list)
         tasks_list_params[user_id]['types'] = types_list
-        difficulties_list: List[DifficulcyEnum] = []
+        difficulties_list: List[DifficultyEnum] = []
         for difficulty_ in payload_params['difficulties']:
             if payload_params['difficulties'][difficulty_]:
-                difficulties_list.append(DifficulcyEnum(difficulty_))
+                difficulties_list.append(DifficultyEnum(difficulty_))
         print(difficulties_list)
         tasks_list_params[user_id]['difficulties'] = difficulties_list
         # Подсчет количества задач, подходящих под заданные критерии
         async with async_session_maker() as session:
             stmt = (
                 select(TasksModel)
-                .where(and_(TasksModel.user_id==user_id, TasksModel.type.in_(types_list), TasksModel.difficulcy.in_(difficulties_list)))
+                .where(and_(TasksModel.user_id==user_id, TasksModel.type.in_(types_list), TasksModel.difficulty.in_(difficulties_list)))
             )
             result = await session.execute(stmt)
             tasks = result.all()
@@ -179,7 +179,7 @@ async def edit_show_tasks(event: MessageEvent):
                 tasks_list_params[user_id]['tasks_count'] -= 1
             await event.send_message(
                 (
-                    'Задача выполнена.\nВы получили ' + str(how_much_xp(tasks_list_params[user_id]['curr_task'].difficulcy)) + 
+                    'Задача выполнена.\nВы получили ' + str(how_much_xp(tasks_list_params[user_id]['curr_task'].difficulty)) + 
                     ' опыта ⭐'
                 )
             )
@@ -221,7 +221,7 @@ async def delete_task(task):
 
 async def complete_task(task: TasksModel):
     async with async_session_maker() as session:
-        amount = how_much_xp(task.difficulcy)
+        amount = how_much_xp(task.difficulty)
         # Добавляем пользователю опыт
         stmt = (
             update(UserModel)

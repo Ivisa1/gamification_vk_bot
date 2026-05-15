@@ -7,7 +7,7 @@ from bot import bot, tasks_in_creation
 from db_engine import async_session_maker
 from states import UserStates
 from keyboards import KeyboardCreator as KC
-from models import TasksModel, TypeEnum, DifficulcyEnum
+from models import TasksModel, TypeEnum, DifficultyEnum
 
 create_task_labeler: BotLabeler = BotLabeler()
 
@@ -76,23 +76,23 @@ async def create_task_handler(message: Message):
     elif f'{curr_state}' == f'{UserStates.IN_CREATE_TASK_DIFFICULCY}':
         match message.text:
             case '1':
-                tasks_in_creation[message.from_id].difficulcy = DifficulcyEnum.VERY_EASY
+                tasks_in_creation[message.from_id].difficulty = DifficultyEnum.VERY_EASY
                 await add_task_in_db(message, message.from_id)
                 await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
             case '2':
-                tasks_in_creation[message.from_id].difficulcy = DifficulcyEnum.EASY
+                tasks_in_creation[message.from_id].difficulty = DifficultyEnum.EASY
                 await add_task_in_db(message, message.from_id)
                 await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
             case '3':
-                tasks_in_creation[message.from_id].difficulcy = DifficulcyEnum.MEDIUM
+                tasks_in_creation[message.from_id].difficulty = DifficultyEnum.MEDIUM
                 await add_task_in_db(message, message.from_id)
                 await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
             case '4':
-                tasks_in_creation[message.from_id].difficulcy = DifficulcyEnum.HARD
+                tasks_in_creation[message.from_id].difficulty = DifficultyEnum.HARD
                 await add_task_in_db(message, message.from_id)
                 await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
             case '5':
-                tasks_in_creation[message.from_id].difficulcy = DifficulcyEnum.VERY_HARD
+                tasks_in_creation[message.from_id].difficulty = DifficultyEnum.VERY_HARD
                 await add_task_in_db(message, message.from_id)
                 await bot.state_dispenser.set(peer_id=message.peer_id, state=UserStates.IN_MAIN_MENU)
             case _:
