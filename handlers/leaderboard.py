@@ -7,9 +7,7 @@ from vkbottle.bot import BotLabeler, Message, MessageEvent, rules
 from bot import bot, service_api
 from db_engine import async_session_maker
 from keyboards import KeyboardCreator as KC
-from logic import (
-    get_full_name, get_level, 
-    get_leaderboard_row, empty_callback_answer)
+from logic import get_leaderboard_row, empty_callback_answer
 from models import UserModel
 from states import UserStates
 

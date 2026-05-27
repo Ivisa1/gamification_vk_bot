@@ -1,4 +1,3 @@
-from random import randint
 import vkbottle as vk
 from vkbottle import NotRule, OrRule, AndRule
 from vkbottle.bot import BotLabeler, rules, MessageEvent, Message
@@ -7,9 +6,10 @@ from typing import List
 
 from asyncio import sleep as a_sleep
 from bot import bot, tasks_list_params
+from database import get_task
 from db_engine import async_session_maker
 from randomiser import randomiser
-from logic import empty_callback_answer, get_task, show_task, add_xp, how_much_xp, increment_counter
+from logic import empty_callback_answer, get_task, show_task, how_much_xp, increment_counter
 from models import TasksModel, UserModel, UserCountersModel, TypeEnum, DifficultyEnum
 from states import UserStates
 from keyboards import KeyboardCreator as KC
@@ -73,11 +73,7 @@ async def change_tasks_panel(event: MessageEvent):
         AndRule(
             rules.PayloadContainsRule({'cmd': 'show_tasks'}),
             rules.StateRule(UserStates.IN_CHOOSE_TASKS)
-        ),
-        rules.PayloadContainsRule({'task': 'prev'}),
-        rules.PayloadContainsRule({'task': 'next'}),
-        rules.PayloadContainsRule({'task': 'complete'}),
-        rules.PayloadContainsRule({'task': 'delete'})
+        )
     )
 )
 async def show_tasks(message: Message):

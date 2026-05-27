@@ -14,6 +14,7 @@ from db_engine import sync_engine, async_engine, async_session_maker
 from logic import empty_callback_answer
 from models import *
 from keyboards import KeyboardCreator as KC
+from samples import insert_20_users
 from states import UserStates
 
 # Функция пересоздания БД
@@ -26,6 +27,9 @@ async def recreate_db():
         # Создание таблиц
         BaseModel.metadata.create_all(bind=sync_engine)
 
+async def insert_samples():
+    await insert_20_users()
+
 async def check_user_reg(user_id: int):
     async with async_engine.begin() as aconn:
         result = await aconn.execute(
@@ -37,12 +41,12 @@ async def check_user_reg(user_id: int):
         print(user)
         return bool(user)
 
-seconds_before_new_day = 86400
-@bot.loop_wrapper.interval(seconds=20000)
-async def interval_func():
-    async with async_engine.begin() as aconn:
-        res = await aconn.execute(text('SELECT VERSION();'))
-        print(res.all())
+# seconds_before_new_day = 86400
+# @bot.loop_wrapper.interval(seconds=20000)
+# async def interval_func():
+#     async with async_engine.begin() as aconn:
+#         res = await aconn.execute(text('SELECT VERSION();'))
+#         print(res.all())
 
 @bot.on.message(payload={'cmd': 'main_menu'})
 async def main_menu_return_handler(message: Message):
@@ -81,7 +85,7 @@ async def start(message: Message):
     user_id = message.from_id
     tasks_in_creation.pop(user_id, None)
     tasks_list_params.pop(user_id, None)
-    await message.answer('Добро пожаловать в бота', keyboard=KC.main_menu_keyboard())
+    await message.answer('Вы были успешно зарегестрированы. Приятного использования 😎', keyboard=KC.main_menu_keyboard())
 
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def unknown_event(event: MessageEvent):
@@ -106,6 +110,10 @@ if __name__ == '__main__':
             # loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
         # )
         # asyncio.set_event_loop(asyncio.SelectorEventLoop())
+        # asyncio.run(
+            # insert_samples(),
+            # loop_factory=lambda: asyncio.SelectorEventLoop(selectors.SelectSelector())
+        # )
         bot.loop_wrapper.loop = asyncio.SelectorEventLoop()
         bot.run_forever()
     else:

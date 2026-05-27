@@ -32,43 +32,17 @@ def get_curr_xp_for_next_level(xp: int):
     this_level_xp = get_all_xp_on_this_level(get_level(xp))
     return xp - this_level_xp
 
-async def get_user(user_id: int):
-    async with async_session_maker() as session:
-        stmt = (
-            select(UserModel)
-            .where(UserModel.id==user_id)
-        )
-
 # Формирует строку Имя Фамилия
 def get_full_name(first_name: str, last_name: str):
     return f'{first_name} {last_name}'
 
 # Метод формирует одну строку для таблицы лидеров
 def get_leaderboard_row(user: UserModel, idx: int):
-    sticker_place = '🥇 ' if idx==0 else '🥈 ' if idx==1 else '🥉 ' if idx==2 else '🎖️ ' if idx > 14 else '   '
+    sticker_place = '🥇 ' if idx==0 else '🥈 ' if idx==1 else '🥉 ' if idx==2 else '🎖️ ' if idx < 15 else '🔻 '
     return (
         '%s%i. [id%i|%s] - %i уровень\n'
         % (sticker_place, idx+1, user.id, get_full_name(user.first_name, user.last_name), get_level(user.current_xp))
     )
-
-async def get_task(user_id: int) -> TasksModel:
-    async with async_session_maker() as session:
-        stmt = (
-            select(TasksModel)
-            .where(
-                and_(
-                    TasksModel.user_id==user_id,
-                    TasksModel.type.in_(tasks_list_params[user_id]['types']),
-                    TasksModel.difficulty.in_(tasks_list_params[user_id]['difficulties'])
-                )
-            )
-            .order_by(TasksModel.id.asc())
-            .limit(1)
-            .offset(tasks_list_params[user_id]['curr_offset'])
-        )
-        result = await session.execute(stmt)
-        task: TasksModel = result.scalar()
-        return task
     
 def show_task(task: TasksModel) -> str:
     str_task_info = (
@@ -87,10 +61,6 @@ async def empty_callback_answer(event: MessageEvent):
         user_id=event.user_id,
         event_data=None
     )
-
-async def add_xp(task: TasksModel):
-    amount = how_much_xp(task.difficulty)
-    return 
 
 def how_much_xp(difficulty):
     match difficulty:
