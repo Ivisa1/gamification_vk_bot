@@ -1,7 +1,7 @@
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, text
 
 from bot import tasks_list_params
-from db_engine import async_session_maker
+from db_engine import async_session_maker, async_engine
 from models import UserModel, TasksModel
 
 async def get_user(user_id: int):
@@ -31,3 +31,14 @@ async def get_task(user_id: int) -> TasksModel:
         result = await session.execute(stmt)
         task: TasksModel = result.scalar()
         return task
+
+async def check_user_reg(user_id: int):
+    async with async_engine.begin() as aconn:
+        result = await aconn.execute(
+            text('SELECT * FROM users WHERE id = :user_id'),
+            {'user_id': user_id}
+        )
+        user = result.scalar_one_or_none()
+        
+        print(user)
+        return bool(user)

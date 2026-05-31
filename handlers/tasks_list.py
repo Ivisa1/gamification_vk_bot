@@ -9,7 +9,7 @@ from bot import bot, tasks_list_params
 from database import get_task
 from db_engine import async_session_maker
 from randomiser import randomiser
-from logic import empty_callback_answer, get_task, show_task, how_much_xp, increment_counter
+from logic import empty_callback_answer, show_task, how_much_xp, increment_counter
 from models import TasksModel, UserModel, UserCountersModel, TypeEnum, DifficultyEnum
 from states import UserStates
 from keyboards import KeyboardCreator as KC
